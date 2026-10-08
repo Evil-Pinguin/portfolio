@@ -312,6 +312,7 @@ document.addEventListener('click', (e) => {
   switch (el.dataset.action) {
     case 'tab': setTab(el.dataset.tab); break;
     case 'saveKey':
+      state.ai.apiKey = cleanKey(state.ai.apiKey);
       try { localStorage.setItem(GROQ_KEY, state.ai.apiKey); } catch (err) {}
       state.ai.error = ''; render(); break;
     case 'aiGenerate': aiGenerate(); break;
@@ -374,7 +375,7 @@ document.addEventListener('click', (e) => {
 document.addEventListener('input', (e) => {
   const t = e.target;
   if (t.dataset.ai === 'text') { state.ai.text = t.value; return; }
-  if (t.dataset.ai === 'key') { state.ai.apiKey = t.value.trim(); return; }
+  if (t.dataset.ai === 'key') { state.ai.apiKey = cleanKey(t.value); return; }
   if (t.dataset.draft) { state.draft[t.dataset.draft] = t.value; return; }
   const p = active(); if (!p) return;
   if (t.dataset.field === 'title') {
@@ -459,6 +460,8 @@ function parseJsonLoose(text) {
   if (start < 0 || end < 0) throw new Error('модель вернула ответ не в формате JSON');
   return JSON.parse(clean.slice(start, end + 1));
 }
+// Ключ API может содержать невидимые или не-латинские символы после копирования — оставляем только ASCII
+const cleanKey = (v) => String(v || '').replace(/[^\x21-\x7E]/g, '');
 const cleanList = (arr) => (Array.isArray(arr) ? arr : []).map((x) => String(x).trim()).filter(Boolean);
 
 // Добавляет только новые пункты, без дублей
@@ -476,7 +479,12 @@ function mergeItems(list, texts, kind) {
 
 async function aiGenerate() {
   const ai = state.ai;
+  ai.apiKey = cleanKey(ai.apiKey);
   if (!ai.apiKey) { ai.error = 'Вставьте ключ API Groq в поле справа и нажмите «Сохранить ключ».'; return render(); }
+  if (!ai.apiKey.startsWith('gsk_')) {
+    ai.error = 'Ключ Groq обычно начинается с gsk_. Скопируйте его заново на console.groq.com/keys и вставьте в поле справа.';
+    return render();
+  }
   if (ai.text.trim().length < 20) { ai.error = 'Опишите проект хотя бы в паре предложений.'; return render(); }
   ai.loading = true; ai.error = ''; render();
   try {
@@ -521,6 +529,7 @@ async function aiGenerate() {
   } catch (err) {
     ai.error = 'Не удалось сгенерировать: ' + err.message +
       (err instanceof TypeError ? ' (проверьте интернет и ключ API)' : '');
+    if (/Groq ответил 401/.test(err.message)) ai.error = 'Groq не принял ключ (ошибка 401). Проверьте, что ключ актуален и вставлен полностью.';
   }
   ai.loading = false;
   render();
@@ -597,7 +606,7 @@ function renderAI() {
 }
 
 load();
-state.ai.apiKey = (function () { try { return localStorage.getItem(GROQ_KEY) || ''; } catch (e) { return ''; } })();
+state.ai.apiKey = (function () { try { return cleanKey(localStorage.getItem(GROQ_KEY)); } catch (e) { return ''; } })();
 render();
 const themeBtn = $('#themeBtn');
 if (themeBtn) themeBtn.textContent = isDark() ? '☀️ Светлая тема' : '🌙 Тёмная тема';
