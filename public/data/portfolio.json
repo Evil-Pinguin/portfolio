@@ -1,0 +1,686 @@
+{
+    "categories": [
+        {
+            "id": "site",
+            "label": "Сайт",
+            "isDefault": true
+        },
+        {
+            "id": "game",
+            "label": "Игра",
+            "isDefault": true
+        },
+        {
+            "id": "education",
+            "label": "Обучение",
+            "isDefault": true
+        },
+        {
+            "id": "other",
+            "label": "Другое",
+            "isDefault": true
+        }
+    ],
+    "projects": [
+        {
+            "id": "n5zm4c7tmuz8shbc",
+            "title": "https://evilpin2cpp.vercel.app/",
+            "version": "1.1",
+            "category": "education",
+            "icon": "icons/category-education.png",
+            "description": "",
+            "goals": [],
+            "tasks": [],
+            "links": [
+                {
+                    "id": "lapi1lf7muz8ssjc",
+                    "type": "site",
+                    "label": "Сайт",
+                    "url": "https://evilpin2cpp.vercel.app/"
+                }
+            ],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.1",
+                    "title": "https://evilpin2cpp.vercel.app/",
+                    "date": "2026-10-08T09:56:14+02:00"
+                },
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T09:56:02+02:00"
+                }
+            ],
+            "created": "2026-10-08T09:56:02+02:00",
+            "updated": "2026-10-08T09:56:28+02:00"
+        },
+        {
+            "id": "37rmbodymuz8r51a",
+            "title": "Новый проектhttps://lexicard-evilpin.vercel.app/",
+            "version": "1.1",
+            "category": "education",
+            "icon": "icons/category-education.png",
+            "description": "",
+            "goals": [],
+            "tasks": [],
+            "links": [
+                {
+                    "id": "9oal60r4muz8rj25",
+                    "type": "site",
+                    "label": "Сайт",
+                    "url": "https://lexicard-evilpin.vercel.app/"
+                }
+            ],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.1",
+                    "title": "Новый проектhttps://lexicard-evilpin.vercel.app/",
+                    "date": "2026-10-08T09:55:14+02:00"
+                },
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T09:54:59+02:00"
+                }
+            ],
+            "created": "2026-10-08T09:54:59+02:00",
+            "updated": "2026-10-08T09:56:34+02:00"
+        },
+        {
+            "id": "ta42t1r5muz8q0yz",
+            "title": "Фильмы поиск",
+            "version": "1.3",
+            "category": "site",
+            "icon": "icons/icon-mobile.png",
+            "description": "",
+            "goals": [],
+            "tasks": [],
+            "links": [
+                {
+                    "id": "k3tkhrpdmuz8qde0",
+                    "type": "site",
+                    "label": "Сайт",
+                    "url": "https://sites-phi-puce.vercel.app/"
+                }
+            ],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.3",
+                    "title": "Фильмы поиск",
+                    "date": "2026-10-08T09:57:42+02:00"
+                },
+                {
+                    "version": "1.2",
+                    "title": "https://sites-phi-puce.vercel.app/",
+                    "date": "2026-10-08T09:57:30+02:00"
+                },
+                {
+                    "version": "1.1",
+                    "title": "Новый проектhttps://sites-phi-puce.vercel.app/",
+                    "date": "2026-10-08T09:54:17+02:00"
+                },
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T09:54:07+02:00"
+                }
+            ],
+            "created": "2026-10-08T09:54:07+02:00",
+            "updated": "2026-10-08T09:57:48+02:00"
+        },
+        {
+            "id": "fg4mrt43muz8o9ka",
+            "title": "raiden",
+            "version": "1.2",
+            "category": "site",
+            "icon": "icons/category-game.png",
+            "description": "",
+            "goals": [],
+            "tasks": [],
+            "links": [
+                {
+                    "id": "ophdgux2muz8okoq",
+                    "type": "site",
+                    "label": "Сайт",
+                    "url": "https://raiden-dusky.vercel.app/"
+                }
+            ],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.2",
+                    "title": "raiden",
+                    "date": "2026-10-08T09:53:37+02:00"
+                },
+                {
+                    "version": "1.1",
+                    "title": "Новый проектhttps://raiden-dusky.vercel.app/",
+                    "date": "2026-10-08T09:52:56+02:00"
+                },
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T09:52:45+02:00"
+                }
+            ],
+            "created": "2026-10-08T09:52:45+02:00",
+            "updated": "2026-10-08T09:53:44+02:00"
+        },
+        {
+            "id": "j1gpj9zlmuz8nnbg",
+            "title": "Новый проектhttps://portfolio-henna-chi-63.vercel.app/",
+            "version": "1.1",
+            "category": "other",
+            "icon": "icons/category-other.png",
+            "description": "",
+            "goals": [],
+            "tasks": [],
+            "links": [
+                {
+                    "id": "31ug3gpzmuz8nvig",
+                    "type": "site",
+                    "label": "Сайт",
+                    "url": "https://portfolio-henna-chi-63.vercel.app/"
+                }
+            ],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.1",
+                    "title": "Новый проектhttps://portfolio-henna-chi-63.vercel.app/",
+                    "date": "2026-10-08T09:52:24+02:00"
+                },
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T09:52:16+02:00"
+                }
+            ],
+            "created": "2026-10-08T09:52:16+02:00",
+            "updated": "2026-10-08T09:52:27+02:00"
+        },
+        {
+            "id": "ljy71fv2muz8lp7m",
+            "title": "biology-namtsy",
+            "version": "1.3",
+            "category": "other",
+            "icon": "icons/category-education.png",
+            "description": "",
+            "goals": [],
+            "tasks": [],
+            "links": [
+                {
+                    "id": "gvwpjwqqmuz8mqc4",
+                    "type": "site",
+                    "label": "Сайт",
+                    "url": "https://biology-namtsy.vercel.app/"
+                }
+            ],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.3",
+                    "title": "biology-namtsy",
+                    "date": "2026-10-08T09:51:48+02:00"
+                },
+                {
+                    "version": "1.2",
+                    "title": "https://biology-namtsy.vercel.app/Новый проектhttps://vercel.com/evil-pin/biology-namtsy/4b1az4ZatvJkBzJ8iEYZ1dUvFRRn",
+                    "date": "2026-10-08T09:51:30+02:00"
+                },
+                {
+                    "version": "1.1",
+                    "title": "Новый проектhttps://vercel.com/evil-pin/biology-namtsy/4b1az4ZatvJkBzJ8iEYZ1dUvFRRn",
+                    "date": "2026-10-08T09:50:56+02:00"
+                },
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T09:50:45+02:00"
+                }
+            ],
+            "created": "2026-10-08T09:50:45+02:00",
+            "updated": "2026-10-08T09:51:48+02:00"
+        },
+        {
+            "id": "o8bzzx88muz8jv70",
+            "title": "ai-planner",
+            "version": "1.2",
+            "category": "other",
+            "icon": "icons/icon-ai.png",
+            "description": "Разработано веб‑приложение AI Планировщик, позволяющее пользователям быстро формировать структуру проекта, разбивать его на задачи и загружать их в систему. Приложение использует алгоритмы искусственного интеллекта для автоматического предложения подзадач и оптимального порядка их выполнения. Инструмент ориентирован на фрилансеров и небольшие команды, которым нужен простой способ планировать работу без лишних усилий. Реализованы интерфейс на JavaScript, серверная часть на Python и интеграция с облачным хранилищем для загрузки задач.",
+            "goals": [
+                {
+                    "id": "ekqr5v8lmuz8ku0a",
+                    "text": "Автоматизировать процесс планирования проекта"
+                },
+                {
+                    "id": "o7tawxrhmuz8ku0a",
+                    "text": "Разбивать задачи на подзадачи с помощью ИИ"
+                },
+                {
+                    "id": "x8fzvr9emuz8ku0a",
+                    "text": "Обеспечить удобный импорт и экспорт задач"
+                },
+                {
+                    "id": "1s38hv9tmuz8ku0a",
+                    "text": "Повысить продуктивность пользователей"
+                }
+            ],
+            "tasks": [
+                {
+                    "id": "4yl8w17jmuz8ku0a",
+                    "text": "Сформировать концепцию и требования к приложению",
+                    "done": false
+                },
+                {
+                    "id": "a84iokdymuz8ku0a",
+                    "text": "Разработать пользовательский интерфейс для создания и разбивки задач",
+                    "done": false
+                },
+                {
+                    "id": "drqvo69umuz8ku0b",
+                    "text": "Реализовать алгоритм ИИ‑поддержки разбивки задач",
+                    "done": false
+                },
+                {
+                    "id": "x32vc4namuz8ku0b",
+                    "text": "Интегрировать загрузку и хранение задач в облаке",
+                    "done": false
+                },
+                {
+                    "id": "eyjt7p2zmuz8ku0b",
+                    "text": "Провести тестирование и исправление багов",
+                    "done": false
+                },
+                {
+                    "id": "0p9dfdv0muz8ku0b",
+                    "text": "Подготовить документацию и развернуть приложение",
+                    "done": false
+                }
+            ],
+            "links": [
+                {
+                    "id": "hy6fom4zmuz8k9cu",
+                    "type": "site",
+                    "label": "Сайт",
+                    "url": "https://ai-planner-nt2b.vercel.app/"
+                }
+            ],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.2",
+                    "title": "ai-planner",
+                    "date": "2026-10-08T09:50:31+02:00"
+                },
+                {
+                    "version": "1.1",
+                    "title": "Новый проектhttps://ai-planner-nt2b.vercel.app/",
+                    "date": "2026-10-08T09:49:30+02:00"
+                },
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T09:49:20+02:00"
+                }
+            ],
+            "created": "2026-10-08T09:49:20+02:00",
+            "updated": "2026-10-08T09:50:31+02:00"
+        },
+        {
+            "id": "jp69ae9jmuz8ge9e",
+            "title": "linux тренажер",
+            "version": "1.2",
+            "category": "education",
+            "icon": "icons/category-education.png",
+            "description": "Разработан интерактивный веб‑тренажер, позволяющий изучать основы работы в Linux в формате, похожем на Duolingo. Приложение ориентировано на начинающих пользователей, желающих быстро освоить базовые команды и принципы работы в терминале. Реализовано с использованием современных веб‑технологий (HTML5, CSS3, JavaScript) и адаптивного дизайна. Приложение повышает вовлечённость за счёт геймификации, уровней и системы баллов, что ускоряет процесс обучения.",
+            "goals": [
+                {
+                    "id": "njqysuv8muz8ij1q",
+                    "text": "Обучить базовым навыкам работы в Linux"
+                },
+                {
+                    "id": "vcg85vu8muz8ij1q",
+                    "text": "Предоставить интерактивную практику командной строки"
+                },
+                {
+                    "id": "bvmha14imuz8ij1q",
+                    "text": "Повысить уверенность пользователей в администрировании систем"
+                },
+                {
+                    "id": "zfimsyunmuz8izlc",
+                    "text": "Обучить базовым командам Linux"
+                },
+                {
+                    "id": "795klmrhmuz8izlc",
+                    "text": "Повысить мотивацию и вовлечённость через геймификацию"
+                },
+                {
+                    "id": "26afvs8rmuz8izlc",
+                    "text": "Создать удобный интерактивный интерфейс для практики"
+                }
+            ],
+            "tasks": [
+                {
+                    "id": "l1f9p911muz8ij1q",
+                    "text": "Сформировать учебный план и набор базовых команд",
+                    "done": false
+                },
+                {
+                    "id": "alda8e5ymuz8ij1q",
+                    "text": "Разработать симулятор терминала с проверкой ввода",
+                    "done": false
+                },
+                {
+                    "id": "gczmwwyzmuz8ij1q",
+                    "text": "Создать пользовательский интерфейс и систему подсказок",
+                    "done": false
+                },
+                {
+                    "id": "ab70xrzsmuz8ij1q",
+                    "text": "Провести тестирование с целевой аудиторией",
+                    "done": false
+                },
+                {
+                    "id": "7vfuqjqzmuz8ij1q",
+                    "text": "Подготовить документацию и материалы для обучения",
+                    "done": false
+                },
+                {
+                    "id": "o8y98msdmuz8ij1q",
+                    "text": "Запустить приложение в продакшн и собрать обратную связь",
+                    "done": false
+                },
+                {
+                    "id": "eyu5svdimuz8izlc",
+                    "text": "Разработать UI/UX и адаптивный дизайн",
+                    "done": false
+                },
+                {
+                    "id": "1m2iaoljmuz8izlc",
+                    "text": "Реализовать интерактивные упражнения с проверкой ввода команд",
+                    "done": false
+                },
+                {
+                    "id": "jd0gfylzmuz8izlc",
+                    "text": "Встроить систему уровней, баллов и достижений",
+                    "done": false
+                },
+                {
+                    "id": "mx4dc4xkmuz8izlc",
+                    "text": "Подготовить набор учебных модулей и уроков",
+                    "done": false
+                },
+                {
+                    "id": "3j2xhnqtmuz8izlc",
+                    "text": "Провести тестирование на разных браузерах и устройствах",
+                    "done": false
+                },
+                {
+                    "id": "d013quxumuz8izlc",
+                    "text": "Запустить бета‑версию и собрать обратную связь",
+                    "done": false
+                }
+            ],
+            "links": [
+                {
+                    "id": "twiidp9tmuz8h56c",
+                    "type": "site",
+                    "label": "Сайт",
+                    "url": "https://linux-ten-weld.vercel.app/"
+                }
+            ],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.2",
+                    "title": "linux тренажер",
+                    "date": "2026-10-08T09:47:32+02:00"
+                },
+                {
+                    "version": "1.1",
+                    "title": "https://linux-ten-weld.vercel.app/",
+                    "date": "2026-10-08T09:47:00+02:00"
+                },
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T09:46:38+02:00"
+                }
+            ],
+            "created": "2026-10-08T09:46:38+02:00",
+            "updated": "2026-10-08T09:48:53+02:00"
+        },
+        {
+            "id": "xka5ytlsmuz81lvw",
+            "title": "boblox12",
+            "version": "1.2",
+            "category": "education",
+            "icon": "icons/category-education.png",
+            "description": "Разработал учебный курс по Roblox Studio, Lua и AI, рассчитанный на два дня интенсивного обучения. Курс ориентирован на начинающих разработчиков, которым нужно быстро создать и запустить собственную игру. Включены пошаговые материалы, примеры кода и рекомендации по использованию AI для геймплейных элементов. По завершении участники получают готовый прототип, готовый к публикации в Roblox.",
+            "goals": [
+                {
+                    "id": "xy1gosvlmuz8apzd",
+                    "text": "Разработать игровую концепцию за первый день"
+                },
+                {
+                    "id": "6011xmq3muz8apzd",
+                    "text": "Создать полностью функционирующий прототип за два дня"
+                },
+                {
+                    "id": "7irextnumuz8apzd",
+                    "text": "Подготовить игру к публикации в Roblox"
+                },
+                {
+                    "id": "5k5oyp15muz8atjg",
+                    "text": "Создать полностью играбельный прототип игры за 2 дня"
+                },
+                {
+                    "id": "ebi8ltrtmuz8atjg",
+                    "text": "Освоить быстрый прототипинг с помощью AI в Roblox Studio"
+                },
+                {
+                    "id": "awkxptp7muz8atjg",
+                    "text": "Продемонстрировать навыки скриптинга на Lua и работы с игровыми механиками"
+                },
+                {
+                    "id": "jhjvfb4cmuz8ay3k",
+                    "text": "Разработать игровую концепцию за 1 день"
+                },
+                {
+                    "id": "y0b6h2ilmuz8ay3k",
+                    "text": "Создать прототип в Roblox Studio с использованием Lua"
+                },
+                {
+                    "id": "7bn6jdelmuz8ay3k",
+                    "text": "Интегрировать AI‑инструменты для контента"
+                },
+                {
+                    "id": "3b408rf9muz8ay3k",
+                    "text": "Подготовить игру к запуску в Roblox"
+                },
+                {
+                    "id": "dz16j9iamuz8bcns",
+                    "text": "Освоить базовые инструменты Roblox Studio"
+                },
+                {
+                    "id": "0x4n61ylmuz8bcns",
+                    "text": "Научиться писать скрипты на Lua"
+                },
+                {
+                    "id": "g6km50yxmuz8bcns",
+                    "text": "Интегрировать AI‑элементы в игровой процесс"
+                },
+                {
+                    "id": "3nxkd44pmuz8bcns",
+                    "text": "Создать и запустить прототип игры за 2 дня"
+                }
+            ],
+            "tasks": [
+                {
+                    "id": "qmupgkbymuz8apzd",
+                    "text": "Сформировать дизайн уровней и геймплейные идеи",
+                    "done": false
+                },
+                {
+                    "id": "8hpjp2cbmuz8apzd",
+                    "text": "Программировать механику игры на Lua в Roblox Studio",
+                    "done": false
+                },
+                {
+                    "id": "lw9al6bemuz8apzd",
+                    "text": "Интегрировать AI для генерации контента и автоматизации задач",
+                    "done": false
+                },
+                {
+                    "id": "j03qp7q6muz8apze",
+                    "text": "Провести тестирование и отладку прототипа",
+                    "done": false
+                },
+                {
+                    "id": "4xcv4y9zmuz8apze",
+                    "text": "Подготовить метаданные и материалы для публикации",
+                    "done": false
+                },
+                {
+                    "id": "pwx1v7n0muz8apze",
+                    "text": "Запустить игру в Roblox",
+                    "done": false
+                },
+                {
+                    "id": "1k0h3wo0muz8atjg",
+                    "text": "Разработать концепцию и дизайн уровня в первый день",
+                    "done": false
+                },
+                {
+                    "id": "gmobhusmmuz8atjg",
+                    "text": "Написать основные скрипты на Lua для управления персонажем и взаимодействиями",
+                    "done": false
+                },
+                {
+                    "id": "c1fg758pmuz8atjg",
+                    "text": "Использовать AI‑инструменты для генерации кода и ускорения создания контента",
+                    "done": false
+                },
+                {
+                    "id": "usykvnvxmuz8atjg",
+                    "text": "Отладить и протестировать игру во второй день",
+                    "done": false
+                },
+                {
+                    "id": "qj62z4q0muz8atjg",
+                    "text": "Подготовить сборку к публикации в Roblox и собрать обратную связь",
+                    "done": false
+                },
+                {
+                    "id": "752trqzzmuz8ay3k",
+                    "text": "Разработать базовый уровень и основные механики (Day 1)",
+                    "done": false
+                },
+                {
+                    "id": "tdqvog3vmuz8ay3k",
+                    "text": "Программировать скрипты на Lua (Day 1)",
+                    "done": false
+                },
+                {
+                    "id": "a842q6dvmuz8ay3k",
+                    "text": "Внедрить AI‑ассистент для генерации контента (Day 2)",
+                    "done": false
+                },
+                {
+                    "id": "w0kfi38hmuz8ay3k",
+                    "text": "Тестировать и отлаживать игру (Day 2)",
+                    "done": false
+                },
+                {
+                    "id": "bel21m8jmuz8ay3k",
+                    "text": "Подготовить публикацию в Roblox (будущее)",
+                    "done": false
+                },
+                {
+                    "id": "d0i381almuz8ay3k",
+                    "text": "Собрать обратную связь от игроков после запуска (будущее)",
+                    "done": false
+                },
+                {
+                    "id": "1a0oy55pmuz8bcns",
+                    "text": "Разработал структуру курса и расписание на два дня",
+                    "done": false
+                },
+                {
+                    "id": "iamb7unzmuz8bcns",
+                    "text": "Подготовил учебные материалы, примеры кода и инструкции по использованию AI",
+                    "done": false
+                },
+                {
+                    "id": "32c73qarmuz8bcns",
+                    "text": "Записал видеоруководства и создал практические задания",
+                    "done": false
+                },
+                {
+                    "id": "zbes6cgvmuz8bcns",
+                    "text": "Провёл тестовое занятие и собрал обратную связь",
+                    "done": false
+                },
+                {
+                    "id": "vhrnejmzmuz8bcns",
+                    "text": "Запланировано запуск курса и привлечение первой группы участников",
+                    "done": false
+                }
+            ],
+            "links": [
+                {
+                    "id": "yg02vvxdmuz83nrc",
+                    "type": "site",
+                    "label": "Сайт",
+                    "url": "https://boblox12.vercel.app/"
+                }
+            ],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.2",
+                    "title": "boblox12",
+                    "date": "2026-10-08T09:38:43+02:00"
+                },
+                {
+                    "version": "1.1",
+                    "title": "https://boblox12.vercel.app/",
+                    "date": "2026-10-08T09:36:38+02:00"
+                },
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T09:35:08+02:00"
+                }
+            ],
+            "created": "2026-10-08T09:35:08+02:00",
+            "updated": "2026-10-08T09:48:56+02:00"
+        },
+        {
+            "id": "448dxhuamuz6envw",
+            "title": "Новый проект",
+            "version": "1.0",
+            "category": "other",
+            "icon": "icons/category-other.png",
+            "description": "ервнкыЦЙУПЕ4У",
+            "goals": [],
+            "tasks": [],
+            "links": [],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T08:49:18+02:00"
+                }
+            ],
+            "created": "2026-10-08T08:49:18+02:00",
+            "updated": "2026-10-08T08:50:18+02:00"
+        }
+    ]
+}
