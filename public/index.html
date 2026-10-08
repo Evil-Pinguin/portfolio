@@ -17,12 +17,22 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <header class="gh-header">
+    <div class="gh-brand">
+      <span class="gh-logo">📁</span>
+      <span>Портфолио</span>
+    </div>
+    <div class="gh-actions">
+      <button class="btn" data-action="toggleTheme" id="themeBtn">🌙 Тёмная тема</button>
+      <button class="btn btn-primary" data-action="new">+ Новый проект</button>
+    </div>
+  </header>
   <div class="app">
     <aside id="sidebar"></aside>
     <main id="main"></main>
   </div>
   <input type="file" id="iconFile" accept="image/*" hidden>
-  <input type="file" id="imageFile" accept="image/*" hidden>
+  <input type="file" id="imageFile" accept="image/*" multiple hidden>
   <script src="app.js"></script>
 </body>
 </html>
