@@ -98,9 +98,8 @@ function saveProject(PDO $pdo, array $p, ?string $forcedId = null): string {
     if ($title === '') fail('Пустое название проекта');
 
     $icon = txt($p['icon'] ?? 'icons/category-other.png', 255);
-    if (strpos($icon, 'data:') === 0) {
-        fail('Своя иконка-картинка пока не сохраняется в базу. Выберите иконку из списка.');
-    }
+    // Своя картинка (data:...) пока не хранится в базе: иконку в БД не трогаем
+    $saveIcon = strpos($icon, 'data:') !== 0;
 
     // Категория должна существовать, иначе — other
     $cat = txt($p['category'] ?? 'other', 40);
@@ -112,16 +111,18 @@ function saveProject(PDO $pdo, array $p, ?string $forcedId = null): string {
     $created = dt($p['created'] ?? null) ?? $now;
     $updated = dt($p['updated'] ?? null) ?? $now;
 
-    $pdo->prepare(
-        'INSERT INTO projects (id, title, version, category_id, icon, description, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-           title = VALUES(title), version = VALUES(version), category_id = VALUES(category_id),
-           icon = VALUES(icon), description = VALUES(description), updated_at = VALUES(updated_at)'
-    )->execute([
-        $id, $title, txt($p['version'] ?? '1.0', 20), $cat, $icon,
-        (string)($p['description'] ?? ''), $created, $updated,
-    ]);
+    $cols = ['id', 'title', 'version', 'category_id', 'description', 'created_at', 'updated_at'];
+    $vals = [$id, $title, txt($p['version'] ?? '1.0', 20), $cat, (string)($p['description'] ?? ''), $created, $updated];
+    $upd  = 'title = VALUES(title), version = VALUES(version), category_id = VALUES(category_id),
+             description = VALUES(description), updated_at = VALUES(updated_at)';
+    if ($saveIcon) {
+        $cols[] = 'icon';
+        $vals[] = $icon;
+        $upd .= ', icon = VALUES(icon)';
+    }
+    $sql = 'INSERT INTO projects (' . implode(', ', $cols) . ') VALUES (' . implode(', ', array_fill(0, count($cols), '?')) . ')
+            ON DUPLICATE KEY UPDATE ' . $upd;
+    $pdo->prepare($sql)->execute($vals);
 
     // Дочерние таблицы: заменяем целиком (проще и надёжнее для личного проекта)
     foreach (['project_goals', 'project_tasks', 'project_links', 'project_history'] as $t) {

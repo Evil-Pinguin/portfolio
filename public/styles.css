@@ -293,3 +293,6 @@ select.btn{padding:3px 8px;min-height:28px;font-size:12px}
 .cat-add{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
 .cat-add input{padding:4px 10px;min-height:28px;border:1px solid var(--border);border-radius:6px;background:var(--canvas);color:var(--fg);font-size:13px;outline:none;width:180px}
 .cat-add input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--focus)}
+
+/* Статус связи с базой в шапке */
+.sync{font-size:12px;color:rgba(255,255,255,.72);align-self:center;margin-right:6px;white-space:nowrap}

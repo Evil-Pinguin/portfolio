@@ -117,6 +117,91 @@ function load() {
 function save() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state.projects)); }
   catch (e) { alert('Не хватает места в хранилище браузера. Удалите часть фото или используйте файлы меньшего размера.'); }
+  scheduleSync();
+}
+
+/* ---------- Связь с базой (PHP API в XAMPP) ---------- */
+const API_BASE = 'http://localhost/portfolio-api/api.php';
+const syncState = { timer: null, running: false, again: false, lastPushed: {}, error: '' };
+
+async function api(method, path, body) {
+  const res = await fetch(API_BASE + path, {
+    method,
+    headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error((data && data.error) || `Ошибка ${res.status}`);
+  return data;
+}
+function setSyncStatus(text) {
+  const el = document.getElementById('syncStatus');
+  if (el) el.textContent = text;
+}
+// Фото пока хранятся только в браузере (шаг загрузки файлов будет отдельным)
+function payload(p) {
+  const { images, ...rest } = p;
+  return rest;
+}
+function scheduleSync() {
+  clearTimeout(syncState.timer);
+  syncState.timer = setTimeout(flushSync, 400);
+}
+async function flushSync() {
+  if (syncState.running) { syncState.again = true; return; }
+  syncState.running = true;
+  let failed = false;
+  try {
+    for (const p of state.projects) {
+      const body = payload(p);
+      const json = JSON.stringify(body);
+      if (syncState.lastPushed[p.id] === json) continue;
+      try {
+        await api('POST', '/projects', body); // POST = создать или обновить (upsert)
+        syncState.lastPushed[p.id] = json;
+      } catch (e) {
+        failed = true;
+        syncState.error = e.message;
+      }
+    }
+  } finally {
+    syncState.running = false;
+  }
+  if (syncState.again) { syncState.again = false; return flushSync(); }
+  setSyncStatus(failed ? 'Нет связи с базой: ' + syncState.error : 'Сохранено в базе');
+}
+
+// При запуске: берём категории и проекты из базы; если база пуста — переносим данные из браузера
+async function bootstrap() {
+  const local = (function () {
+    try { const raw = localStorage.getItem(STORE_KEY); return raw ? JSON.parse(raw).map(migrate) : []; }
+    catch (e) { return []; }
+  })();
+  try {
+    const cats = await api('GET', '/categories');
+    const ids = new Set(cats.map((c) => c.id));
+    for (const k of Object.keys(CATEGORIES)) if (k !== 'all' && !ids.has(k)) delete CATEGORIES[k];
+    for (const c of cats) CATEGORIES[c.id] = c.label;
+
+    let projects = await api('GET', '/projects');
+    if (!projects.length && local.length) {
+      await api('POST', '/import', local);
+      projects = await api('GET', '/projects');
+    }
+    const localById = new Map(local.map((p) => [p.id, p]));
+    state.projects = projects.map((p) => {
+      const lp = localById.get(p.id);
+      if ((!p.images || !p.images.length) && lp && lp.images && lp.images.length) p.images = lp.images;
+      return migrate(p);
+    });
+    for (const p of state.projects) syncState.lastPushed[p.id] = JSON.stringify(payload(p));
+    setSyncStatus('Подключено к базе');
+  } catch (e) {
+    setSyncStatus('Нет связи с базой — работаем локально');
+    syncState.error = e.message;
+  }
+  state.activeId = state.projects[0]?.id ?? null;
 }
 
 /* ---------- отрисовка ---------- */
@@ -319,24 +404,36 @@ function catChipsHtml(p) {
   return chips + add;
 }
 
-function saveCategory() {
+async function saveCategory() {
   const label = state.draft.newCat.trim().slice(0, 24);
   if (!label) { state.catError = 'Введите название категории'; return render('[data-draft="newCat"]'); }
   if (Object.values(CATEGORIES).some((v) => v.toLowerCase() === label.toLowerCase())) {
     state.catError = 'Такая категория уже есть'; return render('[data-draft="newCat"]');
   }
-  const id = 'c' + uid();
-  CATEGORIES[id] = label;
+  let created;
+  try {
+    created = await api('POST', '/categories', { label });
+  } catch (e) {
+    state.catError = 'Не удалось сохранить в базу: ' + e.message;
+    return render('[data-draft="newCat"]');
+  }
+  CATEGORIES[created.id] = created.label;
   saveCustomCategories();
   const p = active();
-  if (p) { p.category = id; p.updated = now(); save(); }
+  if (p) { p.category = created.id; p.updated = now(); save(); }
   state.addingCat = false; state.catError = ''; state.draft.newCat = '';
   render();
 }
 
-function deleteCategory(id) {
+async function deleteCategory(id) {
   if (!CATEGORIES[id] || DEFAULT_CATEGORY_IDS.includes(id)) return;
   if (!confirm(`Удалить категорию «${CATEGORIES[id]}»? Её проекты перейдут в «Другое».`)) return;
+  try {
+    await api('DELETE', '/categories/' + id);
+  } catch (e) {
+    alert('Не удалось удалить категорию: ' + e.message);
+    return;
+  }
   for (const p of state.projects) if (p.category === id) p.category = 'other';
   delete CATEGORIES[id];
   saveCustomCategories();
@@ -465,6 +562,8 @@ document.addEventListener('click', (e) => {
       if (!confirm(`Удалить проект «${p.title}»?`)) break;
       state.projects = state.projects.filter((x) => x.id !== p.id);
       state.activeId = state.projects[0]?.id ?? null;
+      delete syncState.lastPushed[p.id];
+      api('DELETE', '/projects/' + p.id).catch((e) => setSyncStatus('Не удалось удалить в базе: ' + e.message));
       save(); render(); break;
     case 'toggleIcon': state.showIcon = !state.showIcon; renderMain(); break;
     case 'setIcon': p.icon = el.dataset.icon; state.showIcon = false; p.updated = now(); save(); render(); break;
@@ -774,5 +873,6 @@ load();
 restoreUI();
 state.ai.apiKey = (function () { try { return cleanKey(localStorage.getItem(GROQ_KEY)); } catch (e) { return ''; } })();
 render();
+bootstrap().then(() => { restoreUI(); render(); });
 const themeBtn = $('#themeBtn');
 if (themeBtn) setThemeButton(themeBtn);
