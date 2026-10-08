@@ -183,6 +183,22 @@ async function bootstrap() {
     try { const raw = localStorage.getItem(STORE_KEY); return raw ? JSON.parse(raw).map(migrate) : []; }
     catch (e) { return []; }
   })();
+  // Публичный сайт (Vercel): показываем выгрузку из базы (data/portfolio.json), без API
+  if (!IS_LOCAL) {
+    try {
+      const res = await fetch('data/portfolio.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error('нет файла');
+      const d = await res.json();
+      for (const c of d.categories) CATEGORIES[c.id] = c.label;
+      state.projects = d.projects.map(migrate);
+      setSyncStatus('Выгрузка из базы');
+    } catch (e) {
+      state.projects = [seed()];
+      setSyncStatus('Выгрузка не найдена');
+    }
+    state.activeId = state.projects[0]?.id ?? null;
+    return;
+  }
   try {
     const cats = await api('GET', '/categories');
     const ids = new Set(cats.map((c) => c.id));
