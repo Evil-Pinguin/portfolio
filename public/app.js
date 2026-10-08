@@ -27,7 +27,8 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const fmtDate = (iso) => new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 const bump = (v) => { const [a, b] = v.split('.').map(Number); return `${a}.${b + 1}`; };
 const active = () => state.projects.find((p) => p.id === state.activeId) || null;
-const isImg = (s) => typeof s === 'string' && s.startsWith('data:');
+const isImg = (s) => typeof s === 'string' && (s.startsWith('data:') || s.startsWith('icons/'));
+const CATEGORY_ICONS = ['icons/category-site.png', 'icons/category-game.png', 'icons/category-education.png', 'icons/category-other.png'];
 const iconHtml = (icon, cls) => isImg(icon)
   ? `<img class="${cls}" src="${icon}" alt="">`
   : `<span class="${cls}">${esc(icon || '📁')}</span>`;
@@ -211,7 +212,8 @@ function renderMain() {
       </div>
     </header>
     ${state.showIcon ? `<div class="popover">
-        <div class="emoji-grid">${ICONS.map((e) => `<button data-action="setIcon" data-emoji="${e}">${e}</button>`).join('')}</div>
+        <div class="icon-choices">${CATEGORY_ICONS.map((src) => `<button class="icon-choice" data-action="setIcon" data-icon="${src}"><img src="${src}" alt=""></button>`).join('')}</div>
+        <div class="emoji-grid">${ICONS.map((e) => `<button data-action="setIcon" data-icon="${e}">${e}</button>`).join('')}</div>
         <button class="btn btn-small" data-action="uploadIcon">Загрузить свою картинку</button>
       </div>` : ''}
     ${state.showHistory ? historyHtml(p) : ''}
@@ -332,7 +334,7 @@ document.addEventListener('click', (e) => {
       state.activeId = state.projects[0]?.id ?? null;
       save(); render(); break;
     case 'toggleIcon': state.showIcon = !state.showIcon; renderMain(); break;
-    case 'setIcon': p.icon = el.dataset.emoji; state.showIcon = false; p.updated = now(); save(); render(); break;
+    case 'setIcon': p.icon = el.dataset.icon; state.showIcon = false; p.updated = now(); save(); render(); break;
     case 'uploadIcon': $('#iconFile').click(); break;
     case 'toggleHistory': state.showHistory = !state.showHistory; renderMain(); break;
     case 'restore': commitTitle(p, p.history[+el.dataset.idx].title, true); render(); break;
