@@ -1,0 +1,47 @@
+{
+    "categories": [
+        {
+            "id": "site",
+            "label": "Сайт",
+            "isDefault": true
+        },
+        {
+            "id": "game",
+            "label": "Игра",
+            "isDefault": true
+        },
+        {
+            "id": "education",
+            "label": "Обучение",
+            "isDefault": true
+        },
+        {
+            "id": "other",
+            "label": "Другое",
+            "isDefault": true
+        }
+    ],
+    "projects": [
+        {
+            "id": "448dxhuamuz6envw",
+            "title": "Новый проект",
+            "version": "1.0",
+            "category": "other",
+            "icon": "icons/category-other.png",
+            "description": "ервнкыЦЙУПЕ4У",
+            "goals": [],
+            "tasks": [],
+            "links": [],
+            "images": [],
+            "history": [
+                {
+                    "version": "1.0",
+                    "title": "Новый проект",
+                    "date": "2026-10-08T08:49:18+02:00"
+                }
+            ],
+            "created": "2026-10-08T08:49:18+02:00",
+            "updated": "2026-10-08T08:50:18+02:00"
+        }
+    ]
+}
