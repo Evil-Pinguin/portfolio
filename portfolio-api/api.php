@@ -20,8 +20,13 @@ require __DIR__ . '/db.php';
 $cfg = require __DIR__ . '/config.php';
 
 // --- CORS: разрешаем только свои адреса фронтенда ---
+// Изменения (POST/PUT/DELETE) принимаются только с своих адресов (localhost).
+// Публичные адреса (public_read_origins, например Vercel) могут только читать (GET).
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin !== '' && in_array($origin, $cfg['allowed_origins'], true)) {
+$isWrite = ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET';
+$readOnlyOrigins = $cfg['public_read_origins'] ?? [];
+if ($origin !== '' && (in_array($origin, $cfg['allowed_origins'], true)
+    || (!$isWrite && in_array($origin, $readOnlyOrigins, true)))) {
     header('Access-Control-Allow-Origin: ' . $origin);
     header('Vary: Origin');
 }
@@ -31,6 +36,11 @@ header('Content-Type: application/json; charset=utf-8');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
     http_response_code(204);
+    exit;
+}
+if ($isWrite && !in_array($origin, $cfg['allowed_origins'], true)) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Изменения принимаются только с localhost'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

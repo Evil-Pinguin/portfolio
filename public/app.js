@@ -121,7 +121,11 @@ function save() {
 }
 
 /* ---------- Связь с базой (PHP API в XAMPP) ---------- */
-const API_BASE = 'http://localhost/portfolio-api/api.php';
+// На своём компьютере работаем с локальной базой; на публичном сайте (Vercel) — только чтение через туннель ngrok
+const IS_LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
+const API_BASE = IS_LOCAL
+  ? 'http://localhost/portfolio-api/api.php'
+  : 'https://survivor-skyrocket-motivator.ngrok-free.dev/portfolio-api/api.php';
 const syncState = { timer: null, running: false, again: false, lastPushed: {}, error: '' };
 
 async function api(method, path, body) {
@@ -149,6 +153,7 @@ function scheduleSync() {
   syncState.timer = setTimeout(flushSync, 400);
 }
 async function flushSync() {
+  if (!IS_LOCAL) return; // публичный сайт только читает
   if (syncState.running) { syncState.again = true; return; }
   syncState.running = true;
   let failed = false;
@@ -185,7 +190,7 @@ async function bootstrap() {
     for (const c of cats) CATEGORIES[c.id] = c.label;
 
     let projects = await api('GET', '/projects');
-    if (!projects.length && local.length) {
+    if (IS_LOCAL && !projects.length && local.length) {
       await api('POST', '/import', local);
       projects = await api('GET', '/projects');
     }
