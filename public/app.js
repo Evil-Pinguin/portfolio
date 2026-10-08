@@ -1,5 +1,6 @@
 /* Портфолио: проекты, версии названия, цели/задачи, ссылки, изображение, предпросмотр */
 const STORE_KEY = 'portfolio-projects-v1';
+const THEME_KEY = 'portfolio-theme';
 const CATEGORIES = { all: 'Все', site: 'Сайт', game: 'Игра', education: 'Обучение', other: 'Другое' };
 const LINK_TYPES = {
   github: { label: 'GitHub', icon: '🐙' },
@@ -90,7 +91,16 @@ function renderSidebar() {
           <span class="pi-meta">${CATEGORIES[p.category]} · v${p.version}</span>
         </span>
       </button>`).join('') : '<p class="muted small">Проектов пока нет</p>'}
-    </nav>`;
+    </nav>
+    <button class="theme-toggle" data-action="toggleTheme">${themeLabel()}</button>`;
+}
+
+function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+function themeLabel() { return isDark() ? '☀️ Светлая тема' : '🌙 Тёмная тема'; }
+function setTheme(dark) {
+  if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+  try { localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); } catch (e) {}
 }
 
 function historyHtml(p) {
@@ -296,6 +306,10 @@ document.addEventListener('click', (e) => {
       save(); render('.title');
       break;
     }
+    case 'toggleTheme':
+      setTheme(!isDark());
+      el.textContent = themeLabel();
+      break;
     case 'filter': state.filter = el.dataset.cat; renderSidebar(); break;
     case 'select':
       state.activeId = el.dataset.id;
