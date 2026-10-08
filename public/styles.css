@@ -284,3 +284,12 @@ select.btn{padding:3px 8px;min-height:28px;font-size:12px}
 /* Иконки-картинки вместо смайликов */
 .ico{width:16px;height:16px;border-radius:4px;vertical-align:-3px;margin-right:2px;object-fit:cover;display:inline-block}
 .chip .ico{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+
+/* Свои категории */
+.cat-wrap{display:inline-flex;align-items:center;gap:2px}
+.cat-del{border:0;background:none;color:var(--fg-muted);font-size:15px;line-height:1;cursor:pointer;padding:0 4px;border-radius:4px}
+.cat-del:hover{color:var(--danger);background:var(--btn-hover)}
+.chip-add{width:30px;padding:2px 0;text-align:center;font-size:16px;font-weight:600}
+.cat-add{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cat-add input{padding:4px 10px;min-height:28px;border:1px solid var(--border);border-radius:6px;background:var(--canvas);color:var(--fg);font-size:13px;outline:none;width:180px}
+.cat-add input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--focus)}

@@ -27,9 +27,11 @@ const state = {
   previewId: null,
   tab: 'projects',
   descLoading: false,
+  addingCat: false,
+  catError: '',
   descError: '',
   ai: { apiKey: '', text: '', targetId: 'new', model: 'openai/gpt-oss-120b', loading: false, error: '', result: null },
-  draft: { goal: '', task: '', linkUrl: '', linkLabel: '', linkType: 'site' },
+  draft: { goal: '', task: '', linkUrl: '', linkLabel: '', linkType: 'site', newCat: '' },
 };
 
 const $ = (s) => document.querySelector(s);
@@ -81,7 +83,25 @@ function newProject() {
   };
 }
 // Старые проекты с одним изображением переводим в список фото
+const DEFAULT_CATEGORY_IDS = ['site', 'game', 'education', 'other'];
+const CAT_KEY = 'portfolio-categories';
+function loadCategories() {
+  try {
+    const list = JSON.parse(localStorage.getItem(CAT_KEY) || '[]');
+    for (const c of list) {
+      if (c && typeof c.id === 'string' && typeof c.label === 'string' && !CATEGORIES[c.id]) CATEGORIES[c.id] = c.label;
+    }
+  } catch (e) {}
+}
+function saveCustomCategories() {
+  const custom = Object.entries(CATEGORIES)
+    .filter(([k]) => k !== 'all' && !DEFAULT_CATEGORY_IDS.includes(k))
+    .map(([id, label]) => ({ id, label }));
+  try { localStorage.setItem(CAT_KEY, JSON.stringify(custom)); } catch (e) {}
+}
+
 function migrate(p) {
+  if (!CATEGORIES[p.category] || p.category === 'all') p.category = 'other';
   if (!isImg(p.icon)) p.icon = EMOJI_TO_IMAGE[p.icon] || DEFAULT_ICON;
   if (!Array.isArray(p.images)) p.images = p.image ? [{ id: uid(), src: p.image }] : [];
   delete p.image;
@@ -248,8 +268,7 @@ function renderMain() {
 
   main.innerHTML = `
     <div class="topbar">
-      <div class="chips">${Object.entries(CATEGORIES).filter(([k]) => k !== 'all').map(([k, v]) =>
-        `<button class="chip ${p.category === k ? 'on' : ''}" data-action="setCat" data-cat="${k}">${v}</button>`).join('')}</div>
+      <div class="chips">${catChipsHtml(p)}</div>
       <button class="btn btn-link btn-danger" data-action="delete">Удалить проект</button>
     </div>
 
@@ -281,6 +300,48 @@ function renderMain() {
       ${galleryBox}
       ${previewBox}
     </div>`;
+}
+
+function catChipsHtml(p) {
+  const chips = Object.entries(CATEGORIES).filter(([k]) => k !== 'all').map(([k, v]) => `
+    <span class="cat-wrap">
+      <button class="chip ${p.category === k ? 'on' : ''}" data-action="setCat" data-cat="${k}">${esc(v)}</button>
+      ${DEFAULT_CATEGORY_IDS.includes(k) ? '' : `<button class="cat-del" data-action="catDel" data-cat="${k}" title="Удалить категорию">×</button>`}
+    </span>`).join('');
+  const add = state.addingCat
+    ? `<span class="cat-add">
+         <input data-draft="newCat" value="${esc(state.draft.newCat)}" placeholder="Например: дизайн" maxlength="24">
+         <button class="btn btn-small btn-primary" data-action="catSave">Добавить</button>
+         <button class="btn btn-small" data-action="catCancel">Отмена</button>
+         ${state.catError ? `<span class="ai-error">${esc(state.catError)}</span>` : ''}
+       </span>`
+    : `<button class="chip chip-add" data-action="catAdd" title="Добавить категорию">+</button>`;
+  return chips + add;
+}
+
+function saveCategory() {
+  const label = state.draft.newCat.trim().slice(0, 24);
+  if (!label) { state.catError = 'Введите название категории'; return render('[data-draft="newCat"]'); }
+  if (Object.values(CATEGORIES).some((v) => v.toLowerCase() === label.toLowerCase())) {
+    state.catError = 'Такая категория уже есть'; return render('[data-draft="newCat"]');
+  }
+  const id = 'c' + uid();
+  CATEGORIES[id] = label;
+  saveCustomCategories();
+  const p = active();
+  if (p) { p.category = id; p.updated = now(); save(); }
+  state.addingCat = false; state.catError = ''; state.draft.newCat = '';
+  render();
+}
+
+function deleteCategory(id) {
+  if (!CATEGORIES[id] || DEFAULT_CATEGORY_IDS.includes(id)) return;
+  if (!confirm(`Удалить категорию «${CATEGORIES[id]}»? Её проекты перейдут в «Другое».`)) return;
+  for (const p of state.projects) if (p.category === id) p.category = 'other';
+  delete CATEGORIES[id];
+  saveCustomCategories();
+  if (state.filter === id) state.filter = 'all';
+  save(); render();
 }
 
 function autosize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
@@ -362,6 +423,10 @@ document.addEventListener('click', (e) => {
   const p = active();
   switch (el.dataset.action) {
     case 'tab': setTab(el.dataset.tab); break;
+    case 'catAdd': state.addingCat = true; state.catError = ''; render('[data-draft="newCat"]'); break;
+    case 'catCancel': state.addingCat = false; state.catError = ''; state.draft.newCat = ''; render(); break;
+    case 'catSave': saveCategory(); break;
+    case 'catDel': deleteCategory(el.dataset.cat); break;
     case 'saveKey':
       state.ai.apiKey = cleanKey(state.ai.apiKey);
       try { localStorage.setItem(GROQ_KEY, state.ai.apiKey); } catch (err) {}
@@ -445,9 +510,13 @@ document.addEventListener('input', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && e.target.dataset && e.target.dataset.draft === 'newCat') {
+    state.addingCat = false; state.catError = ''; state.draft.newCat = ''; render(); return;
+  }
   if (e.key !== 'Enter' || e.shiftKey) return;
   const t = e.target;
   if (t.dataset.field === 'title') { e.preventDefault(); t.blur(); }
+  else if (t.dataset.draft === 'newCat') { e.preventDefault(); saveCategory(); }
   else if (t.dataset.draft === 'goal') { e.preventDefault(); addItem('goals'); }
   else if (t.dataset.draft === 'task') { e.preventDefault(); addItem('tasks'); }
   else if (t.dataset.draft === 'linkUrl' || t.dataset.draft === 'linkLabel') { e.preventDefault(); addLink(); }
@@ -700,6 +769,7 @@ function renderAI() {
     </div>`;
 }
 
+loadCategories();
 load();
 restoreUI();
 state.ai.apiKey = (function () { try { return cleanKey(localStorage.getItem(GROQ_KEY)); } catch (e) { return ''; } })();
