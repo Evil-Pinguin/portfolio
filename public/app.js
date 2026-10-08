@@ -17,6 +17,8 @@ const state = {
   showIcon: false,
   showLinkForm: false,
   previewId: null,
+  tab: 'projects',
+  ai: { apiKey: '', text: '', targetId: 'new', model: 'openai/gpt-oss-120b', loading: false, error: '', result: null },
   draft: { goal: '', task: '', linkUrl: '', linkLabel: '', linkType: 'site' },
 };
 
@@ -79,6 +81,8 @@ function save() {
 
 /* ---------- отрисовка ---------- */
 function render(focusSel) {
+  syncTabs();
+  if (state.tab === 'ai') { renderAI(); document.querySelectorAll('textarea').forEach(autosize); return; }
   renderSidebar();
   renderMain();
   document.querySelectorAll('textarea').forEach(autosize);
@@ -306,6 +310,17 @@ document.addEventListener('click', (e) => {
   if (!el) return;
   const p = active();
   switch (el.dataset.action) {
+    case 'tab': setTab(el.dataset.tab); break;
+    case 'saveKey':
+      try { localStorage.setItem(GROQ_KEY, state.ai.apiKey); } catch (err) {}
+      state.ai.error = ''; render(); break;
+    case 'aiGenerate': aiGenerate(); break;
+    case 'aiApply': applyEmployerText(); break;
+    case 'aiCopy': {
+      const txt = state.ai.result?.employerText || '';
+      navigator.clipboard?.writeText(txt).then(() => { el.textContent = 'Скопировано'; }).catch(() => {});
+      break;
+    }
     case 'toggleTheme': {
       const dark = !isDark();
       if (dark) document.documentElement.setAttribute('data-theme', 'dark');
@@ -358,6 +373,8 @@ document.addEventListener('click', (e) => {
 
 document.addEventListener('input', (e) => {
   const t = e.target;
+  if (t.dataset.ai === 'text') { state.ai.text = t.value; return; }
+  if (t.dataset.ai === 'key') { state.ai.apiKey = t.value.trim(); return; }
   if (t.dataset.draft) { state.draft[t.dataset.draft] = t.value; return; }
   const p = active(); if (!p) return;
   if (t.dataset.field === 'title') {
@@ -388,6 +405,8 @@ document.addEventListener('focusout', (e) => {
 
 document.addEventListener('change', async (e) => {
   const t = e.target;
+  if (t.dataset.ai === 'target') { state.ai.targetId = t.value; return; }
+  if (t.dataset.ai === 'model') { state.ai.model = t.value; return; }
   const p = active();
   if (t.id === 'previewSelect') { state.previewId = t.value; renderMain(); return; }
   if (!p || !t.files || !t.files.length) return;
@@ -406,7 +425,179 @@ document.addEventListener('change', async (e) => {
   }
 });
 
+/* ---------- Вкладки ---------- */
+function syncTabs() {
+  document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === state.tab));
+  document.querySelector('.app')?.classList.toggle('single', state.tab === 'ai');
+}
+function setTab(tab) {
+  state.tab = tab;
+  render();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Интеграция ИИ (Groq, OpenAI-совместимый API) ---------- */
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_KEY = 'portfolio-groq-key';
+const GROQ_MODELS = [
+  { id: 'openai/gpt-oss-120b', label: 'gpt-oss-120b — точнее (рекомендуется)' },
+  { id: 'openai/gpt-oss-20b', label: 'gpt-oss-20b — быстрее и дешевле' },
+];
+const AI_CATEGORIES = ['site', 'game', 'education', 'other'];
+const AI_SYSTEM = `Ты помогаешь составлять портфолио. Пользователь описывает ОДИН свой проект. Верни ТОЛЬКО JSON без пояснений и без markdown, в формате:
+{"title":"короткое название проекта","category":"site|game|education|other","employer_text":"текст","goals":["цель"],"tasks":["задача"]}
+Правила:
+- employer_text: улучшенное описание для работодателей на русском, 3-5 предложений: что сделано, для кого, какие технологии, какой результат. Пиши уверенно и понятно, без канцелярита. Не выдумывай цифры и факты, которых нет в тексте пользователя.
+- goals: 2-4 цели проекта, коротко.
+- tasks: 3-6 конкретных задач, включая уже сделанное и то, что предстоит.
+- category: site - сайт или веб-приложение, game - игра, education - обучение или курс, other - остальное.`;
+
+function parseJsonLoose(text) {
+  const clean = text.replace(/```(?:json)?/gi, '').trim();
+  const start = clean.indexOf('{');
+  const end = clean.lastIndexOf('}');
+  if (start < 0 || end < 0) throw new Error('модель вернула ответ не в формате JSON');
+  return JSON.parse(clean.slice(start, end + 1));
+}
+const cleanList = (arr) => (Array.isArray(arr) ? arr : []).map((x) => String(x).trim()).filter(Boolean);
+
+// Добавляет только новые пункты, без дублей
+function mergeItems(list, texts, kind) {
+  const seen = new Set(list.map((x) => x.text.toLowerCase()));
+  let added = 0;
+  for (const t of texts) {
+    if (seen.has(t.toLowerCase())) continue;
+    seen.add(t.toLowerCase());
+    list.push(kind === 'goals' ? { id: uid(), text: t } : { id: uid(), text: t, done: false });
+    added++;
+  }
+  return added;
+}
+
+async function aiGenerate() {
+  const ai = state.ai;
+  if (!ai.apiKey) { ai.error = 'Вставьте ключ API Groq в поле справа и нажмите «Сохранить ключ».'; return render(); }
+  if (ai.text.trim().length < 20) { ai.error = 'Опишите проект хотя бы в паре предложений.'; return render(); }
+  ai.loading = true; ai.error = ''; render();
+  try {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + ai.apiKey },
+      body: JSON.stringify({
+        model: ai.model,
+        temperature: 0.4,
+        max_completion_tokens: 2000,
+        messages: [
+          { role: 'system', content: AI_SYSTEM },
+          { role: 'user', content: ai.text },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`Groq ответил ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const data = await res.json();
+    const r = parseJsonLoose(data.choices?.[0]?.message?.content || '');
+
+    let p = state.projects.find((x) => x.id === ai.targetId);
+    if (!p) {
+      const title = String(r.title || 'Новый проект').trim().slice(0, 120) || 'Новый проект';
+      p = newProject();
+      p.title = title;
+      p.history[0].title = title;
+      p.category = AI_CATEGORIES.includes(r.category) ? r.category : 'other';
+      state.projects.unshift(p);
+      ai.targetId = p.id;
+    }
+    const goalsAdded = mergeItems(p.goals, cleanList(r.goals), 'goals');
+    const tasksAdded = mergeItems(p.tasks, cleanList(r.tasks), 'tasks');
+    p.updated = now();
+    save();
+    ai.result = {
+      projectId: p.id,
+      projectTitle: p.title,
+      employerText: String(r.employer_text || '').trim(),
+      goalsAdded,
+      tasksAdded,
+    };
+  } catch (err) {
+    ai.error = 'Не удалось сгенерировать: ' + err.message +
+      (err instanceof TypeError ? ' (проверьте интернет и ключ API)' : '');
+  }
+  ai.loading = false;
+  render();
+}
+
+function applyEmployerText() {
+  const r = state.ai.result;
+  const p = r && state.projects.find((x) => x.id === r.projectId);
+  if (!p || !r.employerText) return;
+  p.description = r.employerText;
+  p.updated = now();
+  save();
+  state.activeId = p.id;
+  state.tab = 'projects';
+  render();
+}
+
+function renderAI() {
+  const ai = state.ai;
+  const r = ai.result;
+  const projOpts = [
+    `<option value="new" ${ai.targetId === 'new' ? 'selected' : ''}>Новый проект</option>`,
+    ...state.projects.map((p) => `<option value="${p.id}" ${p.id === ai.targetId ? 'selected' : ''}>${esc(p.title)}</option>`),
+  ].join('');
+
+  $('#main').innerHTML = `
+    <div class="ai-page">
+      <header class="ai-head">
+        <h1>Интеграция ИИ</h1>
+        <p class="muted">Опишите проект своими словами. ИИ напишет текст для работодателей и заполнит цели и задачи. Опишите один проект за раз.</p>
+      </header>
+      <div class="grid2" style="margin-top:0">
+        <section class="box">
+          <div class="box-head"><h2 class="box-title">О проекте</h2></div>
+          <div class="box-body">
+            <textarea class="desc ai-input" data-ai="text" rows="10" placeholder="Что за проект, для кого, что сделали, на чём, какой результат. Например: сделала сайт для кофейни на React, заказы через форму и Telegram, за месяц 120 заявок.">${esc(ai.text)}</textarea>
+            <div class="ai-controls">
+              <label class="field"><span>Куда добавить цели и задачи</span>
+                <select class="btn" data-ai="target">${projOpts}</select></label>
+              <label class="field"><span>Модель</span>
+                <select class="btn" data-ai="model">${GROQ_MODELS.map((m) =>
+                  `<option value="${m.id}" ${m.id === ai.model ? 'selected' : ''}>${m.label}</option>`).join('')}</select></label>
+              <button class="btn btn-primary" data-action="aiGenerate" ${ai.loading ? 'disabled' : ''}>${ai.loading ? 'Генерирую…' : 'Сгенерировать'}</button>
+            </div>
+            ${ai.error ? `<p class="ai-error">${esc(ai.error)}</p>` : ''}
+          </div>
+        </section>
+        <section class="box">
+          <div class="box-head"><h2 class="box-title">Ключ API Groq</h2></div>
+          <div class="box-body">
+            <input class="input" data-ai="key" type="password" autocomplete="off" placeholder="gsk_…" value="${esc(ai.apiKey)}">
+            <div class="ai-controls">
+              <button class="btn" data-action="saveKey">Сохранить ключ</button>
+              <span class="muted small">${ai.apiKey ? 'Ключ сохранён в этом браузере' : 'Ключ не задан'}</span>
+            </div>
+            <p class="muted small" style="margin:12px 0 0">Ключ хранится только в этом браузере и отправляется напрямую в Groq. Ключ можно создать на console.groq.com/keys.</p>
+          </div>
+        </section>
+      </div>
+      ${r ? `<section class="box ai-result" style="margin-top:24px">
+        <div class="box-head">
+          <h2 class="box-title">Для работодателей · ${esc(r.projectTitle)}</h2>
+          <div class="ai-controls">
+            <button class="btn btn-small" data-action="aiCopy">Копировать</button>
+            <button class="btn btn-small btn-primary" data-action="aiApply">Записать в описание проекта</button>
+          </div>
+        </div>
+        <div class="box-body">
+          <p class="employer-text">${esc(r.employerText)}</p>
+          <p class="muted small" style="margin:0">Добавлено целей: ${r.goalsAdded}, задач: ${r.tasksAdded}. Они уже в проекте.</p>
+        </div>
+      </section>` : ''}
+    </div>`;
+}
+
 load();
+state.ai.apiKey = (function () { try { return localStorage.getItem(GROQ_KEY) || ''; } catch (e) { return ''; } })();
 render();
 const themeBtn = $('#themeBtn');
 if (themeBtn) themeBtn.textContent = isDark() ? '☀️ Светлая тема' : '🌙 Тёмная тема';

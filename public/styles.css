@@ -256,3 +256,24 @@ select.btn{padding:3px 8px;min-height:28px;font-size:12px}
   .proj-head{flex-direction:column;gap:12px}
   .tile-x{opacity:1}
 }
+
+/* ---------- Вкладки ---------- */
+.tabs{display:flex;gap:4px;padding:0 24px;border-bottom:1px solid var(--border-muted);background:var(--canvas)}
+.tab{border:0;background:none;padding:12px 8px;font-size:14px;color:var(--fg-muted);border-bottom:2px solid transparent;cursor:pointer}
+.tab:hover{color:var(--fg)}
+.tab.on{color:var(--fg);font-weight:600;border-bottom-color:var(--accent-em)}
+.app.single{grid-template-columns:1fr}
+.app.single aside{display:none}
+
+/* ---------- Интеграция ИИ ---------- */
+.ai-page{max-width:1080px}
+.ai-head h1{font-size:28px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+.ai-head p{margin:0 0 24px;font-size:15px}
+.input{width:100%;padding:5px 12px;min-height:32px;border:1px solid var(--border);border-radius:6px;background:var(--canvas);color:var(--fg);font-size:14px;outline:none}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--focus)}
+.ai-input{min-height:220px;resize:vertical;overflow:auto;margin-top:0}
+.ai-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-top:12px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--fg-muted)}
+.ai-error{margin:12px 0 0;color:var(--danger);font-size:13px}
+.ai-result .employer-text{margin:0 0 12px;font-size:16px;line-height:1.7;white-space:pre-wrap}
+.ai-result .box-head .ai-controls{margin:0}
