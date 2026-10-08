@@ -18,6 +18,8 @@ const state = {
   showLinkForm: false,
   previewId: null,
   tab: 'projects',
+  descLoading: false,
+  descError: '',
   ai: { apiKey: '', text: '', targetId: 'new', model: 'openai/gpt-oss-120b', loading: false, error: '', result: null },
   draft: { goal: '', task: '', linkUrl: '', linkLabel: '', linkType: 'site' },
 };
@@ -30,7 +32,11 @@ const fmtDate = (iso) => new Date(iso).toLocaleDateString('ru-RU', { day: 'numer
 const bump = (v) => { const [a, b] = v.split('.').map(Number); return `${a}.${b + 1}`; };
 const active = () => state.projects.find((p) => p.id === state.activeId) || null;
 const isImg = (s) => typeof s === 'string' && (s.startsWith('data:') || s.startsWith('icons/'));
-const CATEGORY_ICONS = ['icons/category-site.png', 'icons/category-game.png', 'icons/category-education.png', 'icons/category-other.png'];
+const CATEGORY_ICONS = [
+  'icons/category-site.png', 'icons/category-game.png', 'icons/category-education.png', 'icons/category-other.png',
+  'icons/icon-mobile.png', 'icons/icon-design.png', 'icons/icon-data.png', 'icons/icon-ai.png',
+  'icons/icon-music.png', 'icons/icon-shop.png', 'icons/icon-rocket.png', 'icons/icon-tools.png',
+];
 const iconHtml = (icon, cls) => isImg(icon)
   ? `<img class="${cls}" src="${icon}" alt="">`
   : `<span class="${cls}">${esc(icon || '📁')}</span>`;
@@ -221,6 +227,10 @@ function renderMain() {
         <button class="btn btn-small" data-action="uploadIcon">Загрузить свою картинку</button>
       </div>` : ''}
     ${state.showHistory ? historyHtml(p) : ''}
+    <div class="desc-tools">
+      <button class="btn btn-small" data-action="genDesc" ${state.descLoading ? 'disabled' : ''}>${state.descLoading ? 'Пишу описание…' : '✨ Сгенерировать описание'}</button>
+      ${state.descError ? `<span class="ai-error">${esc(state.descError)}</span>` : '<span class="muted small">ИИ напишет описание по названию, целям и задачам</span>'}
+    </div>
     <textarea class="desc" data-field="description" rows="2" placeholder="Коротко о проекте: что это и зачем">${esc(p.description)}</textarea>
 
     <div class="grid2">${goalsBox}${tasksBox}</div>
@@ -316,6 +326,7 @@ document.addEventListener('click', (e) => {
       try { localStorage.setItem(GROQ_KEY, state.ai.apiKey); } catch (err) {}
       state.ai.error = ''; render(); break;
     case 'aiGenerate': aiGenerate(); break;
+    case 'genDesc': genDesc(); break;
     case 'aiApply': applyEmployerText(); break;
     case 'aiCopy': {
       const txt = state.ai.result?.employerText || '';
@@ -477,6 +488,44 @@ function mergeItems(list, texts, kind) {
   return added;
 }
 
+async function groqChat(messages, maxTokens = 2000) {
+  const key = cleanKey(state.ai.apiKey);
+  if (!key) throw new Error('не задан ключ Groq (вкладка «Интеграция ИИ»)');
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+    body: JSON.stringify({ model: state.ai.model, temperature: 0.5, max_completion_tokens: maxTokens, messages }),
+  });
+  if (!res.ok) throw new Error(`Groq ответил ${res.status}`);
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
+const DESC_SYSTEM = `Напиши описание проекта для портфолио на русском языке: 3-5 предложений, понятно для работодателя. Используй только факты из данных пользователя, ничего не выдумывай. Верни только текст описания, без заголовков, списков и markdown.`;
+
+async function genDesc() {
+  const p = active(); if (!p) return;
+  state.descLoading = true; state.descError = ''; render();
+  try {
+    const facts = [
+      `Название: ${p.title}`,
+      `Категория: ${CATEGORIES[p.category]}`,
+      p.goals.length ? `Цели: ${p.goals.map((g) => g.text).join('; ')}` : '',
+      p.tasks.length ? `Задачи: ${p.tasks.map((t) => (t.done ? '[сделано] ' : '') + t.text).join('; ')}` : '',
+      p.links.length ? `Ссылки: ${p.links.map((l) => LINK_TYPES[l.type].label + ' ' + l.url).join('; ')}` : '',
+      p.description ? `Текущее описание: ${p.description}` : '',
+    ].filter(Boolean).join('\n');
+    const text = await groqChat([{ role: 'system', content: DESC_SYSTEM }, { role: 'user', content: facts }], 800);
+    if (!text.trim()) throw new Error('пустой ответ модели');
+    p.description = text.trim();
+    p.updated = now(); save();
+  } catch (err) {
+    state.descError = 'Не удалось сгенерировать описание: ' + err.message;
+  }
+  state.descLoading = false;
+  render();
+}
+
 async function aiGenerate() {
   const ai = state.ai;
   ai.apiKey = cleanKey(ai.apiKey);
@@ -517,6 +566,7 @@ async function aiGenerate() {
     }
     const goalsAdded = mergeItems(p.goals, cleanList(r.goals), 'goals');
     const tasksAdded = mergeItems(p.tasks, cleanList(r.tasks), 'tasks');
+    if (!p.description.trim() && r.employer_text) p.description = String(r.employer_text).trim();
     p.updated = now();
     save();
     ai.result = {
