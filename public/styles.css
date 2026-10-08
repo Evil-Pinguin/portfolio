@@ -280,3 +280,7 @@ select.btn{padding:3px 8px;min-height:28px;font-size:12px}
 
 .desc-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
 .desc-tools .ai-error{margin:0}
+
+/* Иконки-картинки вместо смайликов */
+.ico{width:16px;height:16px;border-radius:4px;vertical-align:-3px;margin-right:2px;object-fit:cover;display:inline-block}
+.chip .ico{width:14px;height:14px;vertical-align:-2px;margin-right:4px}

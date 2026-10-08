@@ -3,11 +3,19 @@ const STORE_KEY = 'portfolio-projects-v1';
 const THEME_KEY = 'portfolio-theme';
 const CATEGORIES = { all: 'Все', site: 'Сайт', game: 'Игра', education: 'Обучение', other: 'Другое' };
 const LINK_TYPES = {
-  github: { label: 'GitHub', icon: '🐙' },
-  site: { label: 'Сайт', icon: '🌐' },
-  project: { label: 'Проект', icon: '🔗' },
+  github: { label: 'GitHub', icon: 'icons/link-github.png' },
+  site: { label: 'Сайт', icon: 'icons/link-site.png' },
+  project: { label: 'Проект', icon: 'icons/link-project.png' },
 };
-const ICONS = ['📁', '🚀', '🎮', '📚', '🎨', '💡', '🧩', '🛒', '📱', '🌿', '🧠', '🎵', '🤖', '📷'];
+const DEFAULT_ICON = 'icons/category-other.png';
+// Старые эмодзи-иконки проектов переводим в картинки
+const EMOJI_TO_IMAGE = {
+  '🚀': 'icons/icon-rocket.png', '📁': DEFAULT_ICON, '🎮': 'icons/category-game.png',
+  '📚': 'icons/category-education.png', '🎨': 'icons/icon-design.png', '💡': 'icons/icon-ai.png',
+  '🧩': 'icons/icon-tools.png', '🛒': 'icons/icon-shop.png', '📱': 'icons/icon-mobile.png',
+  '🌿': 'icons/icon-data.png', '🧠': 'icons/icon-ai.png', '🎵': 'icons/icon-music.png',
+  '🤖': 'icons/icon-ai.png', '📷': 'icons/icon-design.png',
+};
 
 const state = {
   projects: [],
@@ -39,14 +47,19 @@ const CATEGORY_ICONS = [
 ];
 const iconHtml = (icon, cls) => isImg(icon)
   ? `<img class="${cls}" src="${icon}" alt="">`
-  : `<span class="${cls}">${esc(icon || '📁')}</span>`;
+  : `<img class="${cls}" src="${DEFAULT_ICON}" alt="">`;
 const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+function setThemeButton(el) {
+  el.innerHTML = isDark()
+    ? '<img class="ico" src="icons/theme-sun.png" alt=""> Светлая тема'
+    : '<img class="ico" src="icons/theme-moon.png" alt=""> Тёмная тема';
+}
 
 /* ---------- данные ---------- */
 function seed() {
   const t = now();
   return {
-    id: uid(), title: 'Мой первый проект', version: '1.1', category: 'site', icon: '🚀',
+    id: uid(), title: 'Мой первый проект', version: '1.1', category: 'site', icon: 'icons/icon-rocket.png',
     description: 'Здесь коротко описываю, что это за проект и зачем он нужен.',
     goals: [{ id: uid(), text: 'Собрать все проекты в одном месте' }],
     tasks: [{ id: uid(), text: 'Добавить ссылку на GitHub', done: true }, { id: uid(), text: 'Добавить сайт', done: false }],
@@ -62,13 +75,14 @@ function seed() {
 function newProject() {
   const t = now();
   return {
-    id: uid(), title: 'Новый проект', version: '1.0', category: 'other', icon: '📁',
+    id: uid(), title: 'Новый проект', version: '1.0', category: 'other', icon: DEFAULT_ICON,
     description: '', goals: [], tasks: [], links: [], images: [],
     history: [{ version: '1.0', title: 'Новый проект', date: t }], created: t, updated: t,
   };
 }
 // Старые проекты с одним изображением переводим в список фото
 function migrate(p) {
+  if (!isImg(p.icon)) p.icon = EMOJI_TO_IMAGE[p.icon] || DEFAULT_ICON;
   if (!Array.isArray(p.images)) p.images = p.image ? [{ id: uid(), src: p.image }] : [];
   delete p.image;
   return p;
@@ -86,7 +100,35 @@ function save() {
 }
 
 /* ---------- отрисовка ---------- */
+const UI_KEY = 'portfolio-ui';
+function persistUI() {
+  const a = state.ai;
+  try {
+    localStorage.setItem(UI_KEY, JSON.stringify({
+      tab: state.tab, activeId: state.activeId, filter: state.filter, previewId: state.previewId,
+      ai: { text: a.text, targetId: a.targetId, model: a.model, result: a.result },
+    }));
+  } catch (e) {}
+}
+function restoreUI() {
+  try {
+    const u = JSON.parse(localStorage.getItem(UI_KEY) || 'null');
+    if (!u) return;
+    if (['projects', 'ai'].includes(u.tab)) state.tab = u.tab;
+    if (u.filter && CATEGORIES[u.filter]) state.filter = u.filter;
+    if (state.projects.some((p) => p.id === u.activeId)) state.activeId = u.activeId;
+    state.previewId = u.previewId || null;
+    if (u.ai) {
+      state.ai.text = u.ai.text || '';
+      state.ai.model = u.ai.model || state.ai.model;
+      state.ai.targetId = (u.ai.targetId === 'new' || state.projects.some((p) => p.id === u.ai.targetId)) ? u.ai.targetId : 'new';
+      state.ai.result = u.ai.result || null;
+    }
+  } catch (e) {}
+}
+
 function render(focusSel) {
+  persistUI();
   syncTabs();
   if (state.tab === 'ai') { renderAI(); document.querySelectorAll('textarea').forEach(autosize); return; }
   renderSidebar();
@@ -157,7 +199,7 @@ function renderMain() {
   const tasksBox = box('Задачи', `<span class="counter">${doneCount}/${p.tasks.length}</span>`, `
     <ul class="list">${p.tasks.map((t) => `
       <li class="row ${t.done ? 'done' : ''}">
-        <button class="check" data-action="toggleTask" data-id="${t.id}" aria-label="Отметить">${t.done ? '✓' : ''}</button>
+        <button class="check" data-action="toggleTask" data-id="${t.id}" aria-label="Отметить">${t.done ? '<svg width="10" height="10" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}</button>
         <span class="row-text">${esc(t.text)}</span>
         <button class="x" data-action="delItem" data-kind="tasks" data-id="${t.id}" title="Удалить">×</button></li>`).join('')}</ul>
     <div class="add-row">
@@ -168,7 +210,7 @@ function renderMain() {
   const linksBody = `
     ${state.showLinkForm ? `<div class="linkform">
         <div class="chips">${Object.entries(LINK_TYPES).map(([k, v]) =>
-          `<button class="chip ${d.linkType === k ? 'on' : ''}" data-action="setLinkType" data-type="${k}">${v.icon} ${v.label}</button>`).join('')}</div>
+          `<button class="chip ${d.linkType === k ? 'on' : ''}" data-action="setLinkType" data-type="${k}"><img class="ico" src="${v.icon}" alt=""> ${v.label}</button>`).join('')}</div>
         <input data-draft="linkUrl" value="${esc(d.linkUrl)}" placeholder="Ссылка, например https://github.com/...">
         <div class="line">
           <input data-draft="linkLabel" value="${esc(d.linkLabel)}" placeholder="Подпись (необязательно)">
@@ -177,7 +219,7 @@ function renderMain() {
       </div>` : ''}
     <div class="links">${p.links.length ? p.links.map((l) => `
       <div class="link-row">
-        <span class="li-icon">${LINK_TYPES[l.type].icon}</span>
+        <img class="li-icon" src="${LINK_TYPES[l.type].icon}" alt="">
         <div class="li-text">
           <a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>
           <span class="muted small">${LINK_TYPES[l.type].label} · ${esc(l.url)}</span>
@@ -223,12 +265,11 @@ function renderMain() {
     </header>
     ${state.showIcon ? `<div class="popover">
         <div class="icon-choices">${CATEGORY_ICONS.map((src) => `<button class="icon-choice" data-action="setIcon" data-icon="${src}"><img src="${src}" alt=""></button>`).join('')}</div>
-        <div class="emoji-grid">${ICONS.map((e) => `<button data-action="setIcon" data-icon="${e}">${e}</button>`).join('')}</div>
         <button class="btn btn-small" data-action="uploadIcon">Загрузить свою картинку</button>
       </div>` : ''}
     ${state.showHistory ? historyHtml(p) : ''}
     <div class="desc-tools">
-      <button class="btn btn-small" data-action="genDesc" ${state.descLoading ? 'disabled' : ''}>${state.descLoading ? 'Пишу описание…' : '✨ Сгенерировать описание'}</button>
+      <button class="btn btn-small" data-action="genDesc" ${state.descLoading ? 'disabled' : ''}>${state.descLoading ? 'Пишу описание…' : '<img class="ico" src="icons/ai-sparkle.png" alt=""> Сгенерировать описание'}</button>
       ${state.descError ? `<span class="ai-error">${esc(state.descError)}</span>` : '<span class="muted small">ИИ напишет описание по названию, целям и задачам</span>'}
     </div>
     <textarea class="desc" data-field="description" rows="2" placeholder="Коротко о проекте: что это и зачем">${esc(p.description)}</textarea>
@@ -338,7 +379,7 @@ document.addEventListener('click', (e) => {
       if (dark) document.documentElement.setAttribute('data-theme', 'dark');
       else document.documentElement.removeAttribute('data-theme');
       try { localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); } catch (err) {}
-      el.textContent = dark ? '☀️ Светлая тема' : '🌙 Тёмная тема';
+      setThemeButton(el);
       break;
     }
     case 'new': {
@@ -386,7 +427,11 @@ document.addEventListener('click', (e) => {
 document.addEventListener('input', (e) => {
   const t = e.target;
   if (t.dataset.ai === 'text') { state.ai.text = t.value; return; }
-  if (t.dataset.ai === 'key') { state.ai.apiKey = cleanKey(t.value); return; }
+  if (t.dataset.ai === 'key') {
+    state.ai.apiKey = cleanKey(t.value);
+    try { localStorage.setItem(GROQ_KEY, state.ai.apiKey); } catch (err) {}
+    return;
+  }
   if (t.dataset.draft) { state.draft[t.dataset.draft] = t.value; return; }
   const p = active(); if (!p) return;
   if (t.dataset.field === 'title') {
@@ -656,7 +701,8 @@ function renderAI() {
 }
 
 load();
+restoreUI();
 state.ai.apiKey = (function () { try { return cleanKey(localStorage.getItem(GROQ_KEY)); } catch (e) { return ''; } })();
 render();
 const themeBtn = $('#themeBtn');
-if (themeBtn) themeBtn.textContent = isDark() ? '☀️ Светлая тема' : '🌙 Тёмная тема';
+if (themeBtn) setThemeButton(themeBtn);
