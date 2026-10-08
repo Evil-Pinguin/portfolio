@@ -1,3 +1,5 @@
 .vercel
 node_modules
 .DS_Store
+portfolio-api/config.php
+config.php
