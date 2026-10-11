@@ -123,6 +123,10 @@ function save() {
 /* ---------- Связь с базой (PHP API в XAMPP) ---------- */
 // На своём компьютере работаем с локальной базой; на публичном сайте (Vercel) — только чтение через туннель ngrok
 const IS_LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
+// Публичная версия (Vercel) — только просмотр: редактировать, добавлять и удалять нельзя
+const READ_ONLY = !IS_LOCAL;
+const VIEW_ACTIONS = ['tab', 'filter', 'select', 'toggleHistory', 'toggleTheme'];
+if (READ_ONLY) document.documentElement.classList.add('public');
 const API_BASE = IS_LOCAL
   ? 'http://localhost/portfolio-api/api.php'
   : 'https://survivor-skyrocket-motivator.ngrok-free.dev/portfolio-api/api.php';
@@ -254,6 +258,7 @@ function restoreUI() {
 }
 
 function render(focusSel) {
+  if (READ_ONLY && state.tab === 'ai') state.tab = 'projects';
   persistUI();
   syncTabs();
   if (state.tab === 'ai') { renderAI(); document.querySelectorAll('textarea').forEach(autosize); return; }
@@ -538,6 +543,7 @@ function resizeImage(file, max) {
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-action]');
   if (!el) return;
+  if (READ_ONLY && (!VIEW_ACTIONS.includes(el.dataset.action) || (el.dataset.action === 'tab' && el.dataset.tab === 'ai'))) return;
   const p = active();
   switch (el.dataset.action) {
     case 'tab': setTab(el.dataset.tab); break;
@@ -610,6 +616,7 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('input', (e) => {
+  if (READ_ONLY) return;
   const t = e.target;
   if (t.dataset.ai === 'text') { state.ai.text = t.value; return; }
   if (t.dataset.ai === 'key') {
@@ -629,7 +636,13 @@ document.addEventListener('input', (e) => {
   }
 });
 
+// На публичной версии поля не редактируются: сразу снимаем фокус
+document.addEventListener('focusin', (e) => {
+  if (READ_ONLY && e.target.matches && e.target.matches('input, textarea, select:not(#previewSelect)')) e.target.blur();
+});
+
 document.addEventListener('keydown', (e) => {
+  if (READ_ONLY) return;
   if (e.key === 'Escape' && e.target.dataset && e.target.dataset.draft === 'newCat') {
     state.addingCat = false; state.catError = ''; state.draft.newCat = ''; render(); return;
   }
@@ -650,6 +663,7 @@ document.addEventListener('focusout', (e) => {
 });
 
 document.addEventListener('change', async (e) => {
+  if (READ_ONLY && e.target.id !== 'previewSelect') return;
   const t = e.target;
   if (t.dataset.ai === 'target') { state.ai.targetId = t.value; return; }
   if (t.dataset.ai === 'model') { state.ai.model = t.value; return; }

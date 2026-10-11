@@ -296,3 +296,10 @@ select.btn{padding:3px 8px;min-height:28px;font-size:12px}
 
 /* Статус связи с базой в шапке */
 .sync{font-size:12px;color:rgba(255,255,255,.72);align-self:center;margin-right:6px;white-space:nowrap}
+
+/* Публичная версия: только просмотр, кнопки редактирования и ИИ скрыты */
+.public [data-action]:not([data-action="tab"]):not([data-action="filter"]):not([data-action="select"]):not([data-action="toggleHistory"]):not([data-action="toggleTheme"]),
+.public [data-tab="ai"],
+.public [data-draft],
+.public [data-ai] { display: none !important; }
+.public [data-field] { pointer-events: none; }
