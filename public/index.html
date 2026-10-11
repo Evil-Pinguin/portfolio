@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Портфолио</title>
+  <script>
+    // Тема применяется до отрисовки, чтобы не было вспышки светлого фона
+    (function () {
+      try {
+        if (localStorage.getItem('portfolio-theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" type="image/png" href="icons/logo.png">
+  <link rel="apple-touch-icon" href="icons/logo.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="gh-header">
+    <div class="gh-brand">
+      <img class="gh-logo" src="icons/logo.png" alt="">
+      <span>Портфолио</span>
+    </div>
+    <div class="gh-actions">
+      <span class="sync" id="syncStatus"></span>
+      <button class="btn" data-action="toggleTheme" id="themeBtn"><img class="ico" src="icons/theme-moon.png" alt=""> Тёмная тема</button>
+      <button class="btn btn-primary" data-action="new">+ Новый проект</button>
+    </div>
+  </header>
+  <nav class="tabs">
+    <button class="tab on" data-action="tab" data-tab="projects">Проекты</button>
+    <button class="tab" data-action="tab" data-tab="ai">Интеграция ИИ</button>
+  </nav>
+  <div class="app">
+    <aside id="sidebar"></aside>
+    <main id="main"></main>
+  </div>
+  <input type="file" id="iconFile" accept="image/*" hidden>
+  <input type="file" id="imageFile" accept="image/*" multiple hidden>
+  <script src="app.js"></script>
+</body>
+</html>
