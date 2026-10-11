@@ -303,3 +303,5 @@ select.btn{padding:3px 8px;min-height:28px;font-size:12px}
 .public [data-draft],
 .public [data-ai] { display: none !important; }
 .public [data-field] { pointer-events: none; }
+/* Публичная версия: заголовок и описание выглядят как текст, а не как поля ввода */
+.public .title, .public .desc { border: 0 !important; background: transparent !important; box-shadow: none !important; cursor: default; resize: none; padding-left: 0; }
